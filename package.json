@@ -1,0 +1,23 @@
+{
+  "name": "internet-speed-test",
+  "version": "1.0.0",
+  "description": "Console HTTP(S) download speed test (Node.js, zero dependencies)",
+  "bin": {
+    "internet-speed-test": "./speed-test.js"
+  },
+  "scripts": {
+    "start": "node speed-test.js",
+    "test:run": "node speed-test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "speed-test",
+    "bandwidth",
+    "download",
+    "cli"
+  ],
+  "license": "MIT",
+  "private": false
+}
