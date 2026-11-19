@@ -2,21 +2,22 @@
 'use strict';
 
 /**
- * Console internet download speed test.
- * Makes 10 sequential HTTP(S) GET requests to the given URL,
- * fully consuming each response body, then prints timing and speed stats.
- *
- * Requires Node.js 18+ (uses built-in fetch).
+ * Консольный тест скорости загрузки по HTTP(S).
+ * 10 последовательных GET-запросов к URL, полное чтение тела ответа.
+ * Node.js 18+ (встроенный fetch).
  */
 
+/** Сколько запросов выполнить подряд (без параллелизма). */
 const REQUEST_COUNT = 10;
 
+/** Сообщение об использовании и выход, если URL не передан. */
 function usage() {
   console.error('Usage: node speed-test.js <url>');
   console.error('Example: node speed-test.js https://speed.cloudflare.com/__down?bytes=10000000');
   process.exit(1);
 }
 
+/** Форматирование размера в B / KiB / MiB / GiB (двоичные приставки). */
 function formatBytes(bytes) {
   if (bytes >= 1024 * 1024 * 1024) {
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GiB`;
@@ -30,6 +31,7 @@ function formatBytes(bytes) {
   return `${bytes} B`;
 }
 
+/** Время одного запроса: миллисекунды или секунды. */
 function formatMs(ms) {
   if (ms >= 1000) {
     return `${(ms / 1000).toFixed(2)} s`;
@@ -37,9 +39,7 @@ function formatMs(ms) {
   return `${ms.toFixed(1)} ms`;
 }
 
-/**
- * Download speed in Mbps (megabits per second, SI: 1 Mbps = 1_000_000 bits/s).
- */
+/** Скорость в Mbps (SI: 1 Mbps = 1_000_000 бит/с) для одного запроса. */
 function formatMbps(bytes, ms) {
   if (ms <= 0) return 'n/a';
   const bitsPerSecond = (bytes * 8) / (ms / 1000);
@@ -47,21 +47,22 @@ function formatMbps(bytes, ms) {
   return `${mbps.toFixed(2)} Mbps`;
 }
 
-/**
- * Throughput in MiB/s (mebibytes per second, 1 MiB = 1024^2 bytes).
- */
+/** Пропускная способность в MiB/s (1 MiB = 1024² байт/с). */
 function formatMiBps(bytes, ms) {
   if (ms <= 0) return 'n/a';
   const mibPerSecond = bytes / (1024 * 1024) / (ms / 1000);
   return `${mibPerSecond.toFixed(2)} MiB/s`;
 }
 
+/**
+ * Один полный цикл загрузки: GET → читаем всё тело в память → время и байты.
+ */
 async function downloadOnce(url) {
   const started = performance.now();
   const response = await fetch(url, {
     method: 'GET',
     redirect: 'follow',
-    cache: 'no-store',
+    cache: 'no-store', // не брать ответ из кэша — измеряем реальную загрузку
   });
 
   if (!response.ok) {
@@ -97,6 +98,7 @@ async function main() {
   const times = [];
   let totalBytes = 0;
 
+  // Последовательные запросы: каждый следующий только после полной загрузки предыдущего
   for (let i = 1; i <= REQUEST_COUNT; i++) {
     process.stdout.write(`Request ${i}/${REQUEST_COUNT}... `);
     try {
@@ -116,6 +118,7 @@ async function main() {
   const totalMs = times.reduce((a, b) => a + b, 0);
   const avgMs = totalMs / times.length;
 
+  // Итоговая скорость — по сумме байт и сумме времени всех 10 запросов
   console.log('');
   console.log('--- Results ---');
   console.log(`Requests:            ${REQUEST_COUNT}`);

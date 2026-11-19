@@ -14,17 +14,31 @@
 node speed-test.js <url>
 ```
 
-Пример (файл ~10 МБ с Cloudflare Speed Test):
+### Живой пример (PNG ~5 МБ)
+
+Прямой запуск:
+
+```bash
+node speed-test.js "https://samplelib.com/png/sample-5mb.png"
+```
+
+Через npm (между `--` и URL **обязателен пробел**, иначе аргумент не передастся — особенно на Windows):
+
+```bash
+npm start -- "https://samplelib.com/png/sample-5mb.png"
+```
+
+### Другой пример (генератор ~10 МБ, Cloudflare)
 
 ```bash
 node speed-test.js "https://speed.cloudflare.com/__down?bytes=10000000"
 ```
 
-Или через npm-скрипт:
-
 ```bash
 npm start -- "https://speed.cloudflare.com/__down?bytes=10000000"
 ```
+
+Если в URL есть символ `&` (например, длинные ссылки Яндекс.Диска), оберните всю строку в кавычки; в PowerShell удобнее одинарные: `'https://...&filename=...'`.
 
 ## Единицы измерения
 
